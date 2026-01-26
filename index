@@ -1,0 +1,199 @@
+import React, { useState } from 'react';
+import { TrendingUp, Shield, DollarSign, AlertCircle } from 'lucide-react';
+
+export default function IULComparison() {
+  const [investment, setInvestment] = useState(10000);
+  const [years, setYears] = useState(10);
+  const [showDetails, setShowDetails] = useState(null);
+
+  // Tasas promedio históricas (aproximadas)
+  const rates = {
+    bank: 0.5, // Cuenta de ahorros
+    cd: 2.5, // Certificado de depósito
+    iul: 6.5, // IUL (rendimiento ilustrativo)
+    sp500: 10.5 // S&P 500 histórico
+  };
+
+  const calculateReturn = (principal, rate, time) => {
+    return principal * Math.pow(1 + rate / 100, time);
+  };
+
+  const products = [
+    {
+      id: 'bank',
+      name: 'Cuenta de Ahorros',
+      rate: rates.bank,
+      icon: DollarSign,
+      color: 'bg-gray-100 border-gray-300',
+      pros: ['Liquidez inmediata', 'FDIC asegurado hasta $250k', 'Sin riesgo'],
+      cons: ['Rendimientos muy bajos', 'No protege contra inflación', 'Sin beneficios fiscales']
+    },
+    {
+      id: 'cd',
+      name: 'Certificado de Depósito',
+      rate: rates.cd,
+      icon: Shield,
+      color: 'bg-blue-50 border-blue-300',
+      pros: ['FDIC asegurado', 'Tasa garantizada', 'Bajo riesgo'],
+      cons: ['Penalidad por retiro anticipado', 'Rendimientos bajos', 'Inflexible']
+    },
+    {
+      id: 'iul',
+      name: 'IUL (Universal Indexado)',
+      rate: rates.iul,
+      icon: TrendingUp,
+      color: 'bg-green-50 border-green-300',
+      pros: ['Potencial de crecimiento mayor', 'Protección contra pérdidas (piso)', 'Beneficios fiscales', 'Componente de seguro de vida'],
+      cons: ['Comisiones y costos altos', 'Complejo de entender', 'Tope en ganancias', 'Requiere estar asegurable']
+    },
+    {
+      id: 'sp500',
+      name: 'Fondo Índice S&P 500',
+      rate: rates.sp500,
+      icon: TrendingUp,
+      color: 'bg-purple-50 border-purple-300',
+      pros: ['Alto potencial histórico', 'Bajas comisiones', 'Líquido', 'Diversificado'],
+      cons: ['Volatilidad alta', 'Puede perder valor', 'Sin protección contra pérdidas', 'Impuestos sobre ganancias']
+    }
+  ];
+
+  return (
+    <div className="max-w-6xl mx-auto p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl shadow-lg">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-800 mb-2 flex items-center gap-2">
+          <Shield className="text-indigo-600" />
+          Comparador de Productos Financieros
+        </h1>
+        <p className="text-gray-600">Compara cómo diferentes productos harían crecer tu dinero</p>
+      </div>
+
+      {/* Controles */}
+      <div className="bg-white rounded-lg p-6 mb-6 shadow-md">
+        <div className="grid md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Inversión Inicial: ${investment.toLocaleString()}
+            </label>
+            <input
+              type="range"
+              min="1000"
+              max="100000"
+              step="1000"
+              value={investment}
+              onChange={(e) => setInvestment(Number(e.target.value))}
+              className="w-full h-2 bg-indigo-200 rounded-lg appearance-none cursor-pointer"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Periodo: {years} años
+            </label>
+            <input
+              type="range"
+              min="1"
+              max="30"
+              step="1"
+              value={years}
+              onChange={(e) => setYears(Number(e.target.value))}
+              className="w-full h-2 bg-indigo-200 rounded-lg appearance-none cursor-pointer"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Tabla de Comparación */}
+      <div className="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+        <table className="w-full">
+          <thead className="bg-indigo-600 text-white">
+            <tr>
+              <th className="px-6 py-4 text-left">Producto</th>
+              <th className="px-6 py-4 text-center">Tasa Promedio</th>
+              <th className="px-6 py-4 text-right">Valor Final</th>
+              <th className="px-6 py-4 text-right">Ganancia</th>
+              <th className="px-6 py-4 text-center">Detalles</th>
+            </tr>
+          </thead>
+          <tbody>
+            {products.map((product) => {
+              const finalValue = calculateReturn(investment, product.rate, years);
+              const profit = finalValue - investment;
+              const Icon = product.icon;
+
+              return (
+                <tr key={product.id} className="border-b hover:bg-gray-50 transition">
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <Icon className="w-5 h-5 text-indigo-600" />
+                      <span className="font-semibold text-gray-800">{product.name}</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 text-center font-mono text-lg">
+                    {product.rate.toFixed(1)}%
+                  </td>
+                  <td className="px-6 py-4 text-right font-bold text-green-600 text-lg">
+                    ${finalValue.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                  </td>
+                  <td className="px-6 py-4 text-right text-gray-700">
+                    +${profit.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    <button
+                      onClick={() => setShowDetails(showDetails === product.id ? null : product.id)}
+                      className="px-4 py-2 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition text-sm font-medium"
+                    >
+                      {showDetails === product.id ? 'Ocultar' : 'Ver más'}
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Detalles del Producto Seleccionado */}
+      {showDetails && (
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          {products.filter(p => p.id === showDetails).map(product => (
+            <div key={product.id}>
+              <h3 className="text-xl font-bold text-gray-800 mb-4">{product.name}</h3>
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="font-semibold text-green-600 mb-2 flex items-center gap-2">
+                    ✓ Ventajas
+                  </h4>
+                  <ul className="space-y-1">
+                    {product.pros.map((pro, idx) => (
+                      <li key={idx} className="text-gray-700">• {pro}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-red-600 mb-2 flex items-center gap-2">
+                    ✗ Desventajas
+                  </h4>
+                  <ul className="space-y-1">
+                    {product.cons.map((con, idx) => (
+                      <li key={idx} className="text-gray-700">• {con}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Advertencia */}
+      <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
+        <div className="flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+          <div className="text-sm text-yellow-800">
+            <p className="font-semibold mb-1">Importante:</p>
+            <p>Los rendimientos mostrados son ilustrativos basados en promedios históricos. El desempeño pasado no garantiza resultados futuros. Los IUL tienen costos y limitaciones que pueden reducir significativamente los rendimientos. Consulta con un asesor financiero antes de tomar decisiones.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
